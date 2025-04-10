@@ -1,0 +1,102 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+
+    {      
+      "debuggerArgs": ["-ex", "skip function USART1_IRQHandler"],
+      "cwd": "${workspaceFolder}",
+      "executable": "build/debug/build/source/app.elf",
+      "name": "JLink-Debug (Linux)",
+      "request": "launch",
+      "preLaunchTask": "JLink-Flash (Linux)",
+      "type": "cortex-debug",
+      "showDevDebugOutput": "raw",
+      "servertype": "jlink",
+      "serverpath": "/opt/SEGGER/JLink/JLinkGDBServer",
+      "serverArgs": ["-speed","4000"],
+      "device":"STM32F411CE",
+      "svdPath": "/opt/st/stm32cubeclt/STMicroelectronics_CMSIS_SVD/STM32F411.svd",          
+      "armToolchainPath": "/opt/st/stm32cubeclt_1.18.0/GNU-tools-for-STM32/bin/",        
+      "interface": "swd",
+      "rttConfig": {
+        "enabled": true,
+        "address": "auto",
+        "decoders": [
+          {
+            "label": "",
+            "port": 0,
+            "type": "console"
+          }
+        ]
+      }
+    },
+    {      
+      "debuggerArgs": ["-ex", "skip function USART1_IRQHandler"],
+      "cwd": "${workspaceFolder}",
+      "executable": "build/debug/build/source/app.elf",
+      "name": "JLink-Debug (Win)",
+      "request": "launch",
+      "preLaunchTask": "JLink-Flash (Win)",
+      "type": "cortex-debug",
+      "showDevDebugOutput": "raw",
+      "servertype": "jlink",
+      "serverpath": "C:/Program Files/SEGGER/JLink_V812F/JLinkGDBServerCL.exe",
+      "serverArgs": ["-speed","4000"],
+      "device":"STM32F411CE",
+      "svdPath": "c:/ST/stm32cubeclt_1.17.0/STMicroelectronics_CMSIS_SVD/STM32F411.svd",                
+      "armToolchainPath": "c:/ST/stm32cubeclt_1.17.0/GNU-tools-for-STM32/bin/",        
+      "interface": "swd",
+      "rttConfig": {
+        "enabled": true,
+        "address": "auto",
+        "decoders": [
+          {
+            "label": "",
+            "port": 0,
+            "type": "console"
+          }
+        ]
+      }
+    },
+    {
+      "cwd": "${workspaceFolder}",
+      "executable": "build/debug/build/source/app.elf",
+      "name": "STLink-Debug (Linux)",
+      "request": "launch",
+      "type": "cortex-debug",
+      "debuggerArgs": ["-ex", "skip function USART1_IRQHandler"],
+      "preLaunchTask": "STLink-Flash (Linux)",
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "none",
+      "gdbPath": "/opt/st/stm32cubectl/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+      "serverpath": "/opt/st/stm32cubectl/STLink-gdb-server/bin/ST-LINK_gdbserver",
+      "servertype": "stlink",
+      "svdPath": "/opt/st/stm32cubeclt/STMicroelectronics_CMSIS_SVD/STM32F411.svd",
+      "liveWatch": {
+        "enabled": true,
+        "refreshRate": 500
+      },
+      "stm32cubeprogrammer": "/opt/st/stm32cubectl/STM32CubeProgrammer/bin"
+    },
+    {
+      "cwd": "${workspaceFolder}",
+      "executable": "build/debug/build/source/app.elf",
+      "name": "STLink-Debug (Win)",
+      "request": "launch",
+      "type": "cortex-debug",
+      "debuggerArgs": ["-ex", "skip function USART1_IRQHandler"],
+      "preLaunchTask": "STLink-Flash (Win)",
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "none",
+      "gdbPath": "C:/st/stm32cubectl_1_17.0/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+      "serverpath": "C:/st/stm32cubectl_1_17.0/STLink-gdb-server/bin/ST-LINK_gdbserver",
+      "servertype": "stlink",
+      "svdPath": "c:/ST/stm32cubeclt_1.17.0/STMicroelectronics_CMSIS_SVD/STM32F411.svd",
+      "liveWatch": {
+        "enabled": true,
+        "refreshRate": 500
+      },
+      "stm32cubeprogrammer": "C:/st/stm32cubectl_1_17.0/STM32CubeProgrammer/bin"
+    }
+  ]
+}

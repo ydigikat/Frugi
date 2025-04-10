@@ -1,0 +1,58 @@
+```mermaid
+
+sequenceDiagram
+  autonumber
+
+  participant DMA/UART
+  participant DAE
+  participant SYNTH
+
+  DAE->>DMA/UART: audio_start()  
+  DAE->>DAE: dae_param_init()
+  DAE->>SYNTH: dae_prepare_for_play()
+
+  par
+    loop      
+      DMA/UART ->>+ DAE: dae_ready_for_audio(ping/pong)
+      
+      loop
+        DAE ->> DAE: midi_buffer_read()
+        DAE ->> DAE: midi_parse()
+        DAE ->> SYNTH: dae_handle_message()
+      end
+
+      DAE ->> SYNTH:  dae_update_parameters()
+      SYNTH ->> SYNTH: update parameters
+      DAE ->> SYNTH: dae_process_block()
+      SYNTH->>DAE: samples float[] 
+      DAE ->> DAE: convert    
+      DAE->>DMA/UART: samples int16[]            
+    end
+  end
+
+  par
+    loop
+      DMA/UART->>DAE: dae_midi_received()
+      DAE->>DAE:midi_buffer_write()
+    end
+  end
+
+```
+
+|# |Description|
+|--|----------|
+|1 | The DAE starts the audio hardware running by calling the low-level board driver function|
+|2 | The DAE creates the parameter store which is empty at this point|
+|3 | The DAE initialises the synthesiser, passing it key parameters such as block size and FSR, the synthesiser will populate the parameter store with values|
+|4 | The DMA controller calls the DAE to inform that a buffer has just been sent, the buffer needs to be refreshed with new audio (buffer swap).|
+|5 | The DAE checks for pending MIDI data in the MIDI ring buffer|
+|6 | The DAE parses all bytes in the ring buffer into complete messages, incomplete messages are left for next cycle|
+|7 | The DAE calls the synth passing it each parsed message for processing, these can be MIDI note events or CC messages and can result in parameters needing to be updated.|
+|8 | The DAE checks for any parameter changes and signals to the synth that it needs to update if so|
+|9 | The synth updates the parameter cache used by voices, reading from the DAE owned store|
+|10 | The DAE calls synth to request a block of audio samples|
+|11 | The synth returns a buffer of float samples|
+|12 | The DAE converts these to 16-bit integers and places in the requested buffer|
+|13| The DMA controller uses refreshed buffer on next buffer swap|
+|14| The UART calls the DAE when a data byte is received|
+|15| The DAE accumulates the data bytes in the MIDI ring buffer|
