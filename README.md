@@ -2,7 +2,7 @@
 
 Frugi (meaning "frugal" or "stingy") is a beginner-friendly virtual analog synth for microcontrollers. Perfect for makers wanting to dip their toes into embedded audio!
 
-While Frugi is fully functional, it's designed more as a learning tool than a polished commercial product.
+While Frugi is mostly functional, it's designed more as a learning bench than a polished commercial product, some bits are still being worked on periodically.
 
 Out of the box, it supports these boards:
 - STM32F411-Generic (the "blackpill" board)
@@ -14,16 +14,16 @@ By looking at how these are implemented, you should be able to add support for y
 
 Frugi is written in plain C using the STM LL driver library instead of C++ or Arduino-style code. 
 
-While Arduino has made microcontrollers super accessible (which is awesome!), outside that ecosystem most embedded systems actually run on C. Learning to work with straight C opens up a whole world of microcontrollers beyond the Arduino family, and gives you deeper control over what's happening under the hood. 
+While Arduino has made microcontrollers super accessible (which is awesome!), outside that ecosystem most embedded systems, and I've worked with these for 40 years,  actually run on C. Learning to work with C opens up a whole world of other microcontrollers, and gives you deeper control over what's happening under the hood. 
 
 Don't worry though - we've kept things as clear and approachable as possible!
 
 ## What Can This Synth Do?
 
-- **It's Polyphonic!**
+- **It's Polyphonic**
   - Play up to 8 notes at once (on the STM32F411)
-  - Smart voice stealing when you play more notes than available voices
-  - Responds to how hard you hit the keys (velocity)
+  - Voice stealing when you play more notes than available voices
+  - Velocity sensitive
 
 - **Sound Generation**
   - Two oscillators per voice with classic waveforms (saw, triangle, pulse)
