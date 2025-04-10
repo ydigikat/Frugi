@@ -21,6 +21,8 @@ Without a structured approach, you'll likely end up with glitchy audio, missed M
 ## How this DAE Works: The Double-Buffer Magic
 This DAE uses a technique called "double-buffering" (or ping-pong buffering) that's essential for smooth audio:
 
+![Double-buffering diagram showing ping-pong buffers]
+
 While one buffer is being transmitted to your audio hardware, the other is being filled with fresh audio samples. When transmission of the first buffer finishes, the roles swap instantly. This keeps your audio flowing without gaps!
 
 Here's how it works step-by-step:

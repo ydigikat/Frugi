@@ -1,49 +1,79 @@
 # Frugi Synthesizer
 
-A virtual analog synthesizer implementation for STM32F411 embedded systems.
+Frugi (meaning "frugal" or "stingey") is a beginner-friendly virtual analog synth for microcontrollers. 
 
-*IMPORTANT*  This project is by no means finished or polished.  It serves only to demonstrate how to use the DAE and as a workbench for exploring audio synthesis.
+While Frugi is mostly functional, it's designed more as a learning tool than a polished commercial product and still has rough edges.
 
-## Overview
+Out of the box, it supports these boards:
+- STM32F411-Generic (the "blackpill" board)
+- STM32F411-Discovery board
 
-Frugi is a polyphonic virtual analog synthesizer designed to run on microcontrollers using FreeRTOS. It provides an introductory synthesis engine with features typically found in hardware synthesizers, implemented for resource-constrained environments.
+By looking at how these are implemented, you should be able to add support for your favorite board too.
 
-## Features
+## Why C Instead of C++?
 
-- **Polyphonic Architecture**:
-  - 6 voices (limits to 3 when debugging)
-  - Voice stealing and intelligent voice allocation
-  - Velocity and note tracking
+Frugi is written in plain C using the STM LL driver library. 
 
-- **Sound Generation**:
-  - Dual oscillators with multiple waveforms (saw, triangle, pulse)
-  - Oscillator detuning, and pulse width modulation
-  - White and pink noise generator
+While Arduino has made microcontrollers super accessible (which is awesome!), outside that ecosystem most embedded systems run on C. Learning to work with straight C opens up a whole world of microcontrollers, and gives you deeper control over what's happening under the hood. 
 
-- **Signal Processing**:
+Don't worry though - I've kept things as clear and approachable as possible!
+
+## What Can This Synth Do?
+
+- **It's Polyphonic**
+  - Play up to 8 notes at once (on the STM32F411)
+  - Smart voice stealing when you play more notes than available voices
+  - Velocity sensitive
+
+- **Sound Generation**
+  - Two oscillators per voice with classic waveforms (saw, triangle, pulse)
+  - Detune oscillators for thick, lush sounds
+  - Adjust pulse width for those hollow, reedy tones
+  - Built-in noise generator (white and pink noise)
+
+- **Sound Shaping**
   - Multi-mode filter (Low Pass, Band Pass, High Pass)
-  - 2-pole and 4-pole filter slopes (12dB/oct and 24dB/oct)
-  - Filter saturation and resonance
-  - Filter cutoff modulation via LFO, envelope, and MIDI note
+  - Choose between gentler (12dB/oct) or steeper (24dB/oct) filter slopes
+  - Filter saturation for some analog-style warmth
+  - Control filter cutoff with LFO, envelope, or your MIDI notes
 
-- **Modulation**:
-  - Dedicated (Yamaha CS20M style) LFO with multiple waveform options
-  - 5 LFO waveforms (triangle, saw, reverse saw, square, sample & hold)
-  - Dual RC envelope generators (amp and mod)
-  - Envelope modes (normal, biased, inverted, biased inverted)
+- **Modulation**
+  - Dedicated LFO (inspired by the Yamaha CS20M) with 5 waveforms
+  - Two envelope generators (one for volume, one for modulation)
+  - Flexible envelope modes (normal, biased, inverted, biased inverted)
 
-- **Control**:
-  - MIDI control via CC mappings
-  - Preset/patch loading
-  - Parameter automation
-  - Note velocity and key tracking
+- **Control**
+  - MIDI control over parameters (via serial RX, MIDI interface needed)
+  - Automate parameters over time
+  - Note velocity and keyboard tracking
 
-## Architecture
+## Provides a Digital Audio Engine (DAE)
 
-![Block Diagram](block.svg)
+A lightweight, real-time audio processing engine built on FreeRTOS. Designed for resource-limited microcontrollers, it gives you the foundation for creating all sorts of audio projects.
 
+- Double-buffered design for smooth, glitch-free audio
+- Works with FreeRTOS for reliable timing
+- Efficient ping-pong buffer system
+- Built-in MIDI parser (receives MIDI 1.0 messages)
+- Parameter system for storing settings
+- Test tone generator to make sure your hardware is working
 
-### Domain Model
+## Includes Board Support Package (BSP)
+
+The BSP handles all the hardware stuff so you can focus on making cool sounds:
+
+- Sets up system clocks for you
+- Configures the floating-point unit for faster audio math
+- Gets LEDs, buttons, and debug pins working
+- Manages the audio interface (works at 44.1kHz, 48kHz, or 96kHz)
+- Handles audio data transfer without eating up CPU time
+- Sets up MIDI input (at the standard 31250 baud rate)
+
+If you're using a J-Link probe, you also get:
+- Real-time debugging with RTT
+- Performance measurement tools
+
+### How It All Fits Together
 
 ```mermaid
 classDiagram
@@ -59,153 +89,100 @@ classDiagram
   Voice "1" *-- "1" Filter
   Voice "1" *-- "1" LFO 
   Voice "1" *-- "1" AMP
+
+
+  %% DAE
+  DAE "1" -- "1" BSP
+  BSP "1" -- "1" I2S
+  BSP "1" -- "1" DMA 
+  BSP "1" -- "1" UART
 ```
 
-### Signal Flow
+Want to learn more? Check out:
 
-Frugi is built with a modular design where each component has a clear responsibility.  The audio rate signals run at sample rate (48kHz) whereas the Control Rate signals run at the block rate, that is every 128 samples.
+1. [BSP - Board Support Package](docs/bsp.md)
+2. [DAE - Digital Audio Engine](docs/dae.md)
+3. [Frugi - Synthesiser](docs/frugi.md)
 
-```
-               ┌───────────────┐
-               │ frugi_synth   │ (Top-level synthesizer control)
-               └───────┬───────┘
-                       │
-                       ▼
-               ┌───────────────┐
-               │ frugi_voice   │ (Voice management)
-               └───────┬───────┘
-                       │
-           ┌───────────┴───────────┐
-           │                       │
-┌──────────▼─────────┐    ┌────────▼────────┐
-│ Audio Rate         │    │ Control Rate    │
-├────────────────────┤    ├─────────────────┤
-│  - frugi_osc       │    │  - frugi_env_gen│
-│  - frugi_noise     │    │  - frugi_lfo    │
-└──────────┬─────────┘    └────────┬────────┘
-           │                       │
-           ▼                       ▼
- ┌─────────────────┐     ┌─────────────────┐
- │  frugi_filter   │ ◄── │ Modulation      │
- └────────┬────────┘     └─────────────────┘
-          │
-          ▼
- ┌─────────────────┐
- │   frugi_amp     │
- └────────┬────────┘
-          │
-          ▼
-     Audio Output
-```
+## Getting Started
 
-1. **Voice Allocation**: When a MIDI note is received, the synth finds an available voice or steals the oldest one.
-2. **Oscillators**: Each voice has two oscillators that generate the raw waveforms.
-3. **Mixer**: The oscillator outputs and noise are mixed together.
-4. **Filter**: The mixed signal passes through a multi-mode filter with modulation.
-5. **Amplifier**: The filtered signal is shaped by the amplitude envelope and final volume.
-6. **LFO & Envelopes**: Provide modulation to various parameters.
-
-## Implementation Details
-
-- **Embedded Focus**: Optimized for real-time performance on microcontrollers.
-- **FreeRTOS Integration**: Uses FreeRTOS for memory management and task scheduling.
-- **Fixed-Point Optimization**: Fast math operations for audio processing.
-- **Memory Management**: Efficient buffer allocation and voice handling.
-- **Parameter System**: Centralized parameter management for all modules.
-
-## Parameters
-
-- **Oscillators**: Waveform, octave, semitone, detune, level, modulation
-- **Filter**: Cutoff, resonance, mode, saturation, envelope amount, LFO depth
-- **Envelopes**: Attack, decay, sustain, release, mode, tracking
-- **LFO**: Rate, mode, waveform
-- **Amp**: Volume, pan, modulation
-
-## Digital Audio Engine
-
-Refer: [DAE README.md](source/dae/README.md)
-
-## Building and Integration
-
-The Frugi engine demonstrates how a synthesiser is integrated into a larger project making use of the DAE audio engine.
-
-1. FreeRTOS for memory management
-2. DSP math utilities (provided in the codebase)
-3. Audio I/O driver integration
-4. MIDI interface for control
-5. DAE audio engine.
-6. Board support files.
-
-Clone the source repository, note that you need the ```dae``` submodule so make sure you use the --recursive flag.  See ```git``` documentation for other ways of doing this.
+First, grab the code:
 
 ```bash
-git clone https://github.com/ydigikat/frugi.git --recursive
+git clone https://github.com/ydigikat/frugi.git 
 ```
 
-#### Using VS Code
+### What You'll Need
 
-Using VS Code is the easiest way to work with the project.  There are ```launch.json``` and ```tasks.json``` files provided for building and debugging on both Windows and Linux, with ST-Link or J-Link probes.
+You probably already have the STM32 toolchain if you're checking out this project, but just in case:
+You'll need either the `stm32cubeclt` command line tools or the `STM32CubeIDE`. The project files are set up for the command line tools.
 
-Make sure you start VS Code in the top-level (frugi) folder.
+When this was written, I was using version 1.18.0, installed at:
+- `/opt/st/stm32cubeclt_1.18.0` (Linux)
+- `C:\ST\stm32cubeclt_1.18.0` (Windows)
 
-You will need the following VS Code extensions installed:
+You might need to update some paths in these files to match your setup:
+- `frugi/cmake/stm_arm_gcc.cmake`
 
-| Plugin | Author |
+If you're using VS Code, also check:
+- `frugi/.vscode/launch.json`
+- `frugi/.vscode/tasks.json`
+
+### Using VS Code (The Easy Way)
+
+VS Code is the simplest way to work with Frugi. Launch files and task configurations are ready to go for both Windows and Linux.
+
+Make sure to open VS Code from the main `frugi` folder!
+
+You'll need these VS Code extensions:
+
+| Extension | Author |
 | ------ | ------ |
-| Cortex-Debug (only required for debugging) | marus25 | 
+| Cortex-Debug (for debugging only) | marus25 | 
 | CMake Tools | Microsoft | 
 | C/C++ Extension Pack | Microsoft |
 | Embedded Tools | Microsoft |
 
-#### Configuring the tool chain
+### Setting Up the Project
 
-Use the command palette (```ctrl+P```) to run the following commands:
+From the command palette (Ctrl+P), run:
+- `CMake: Select Configure Preset` (pick debug or release)
+- `CMake: Delete Cache & Reconfigure`
 
-- ```CMake: Select Configure Preset```  (choose debug or release)
-- ```CMake: Delete Cache & Reconfigure```
+### Building the Project
 
+From the command palette:
+- `CMake: Clean Rebuild` or `CMake: Build`
 
-#### Building
+### Uploading to Your Board
 
-Use the command palette (```ctrl+P```) to run the following command:
+You'll need either:
+- An ST-Link probe
+- A J-Link probe
 
-- ```CMake: Clean Rebuild``` or ```CMake: Build```
-
-#### Programming (flashing) the MCU
-
-To program or debug the MCU you will need one of:
-- ST-Link probe
-- J-Link probe
-
-Tasks are provided for this, see the ```tasks.json``` file in the ```.vscode``` folder:
-
+We've included tasks for both (press Ctrl+Shift+J to see the task list):
 - J-Link Flash (Linux)
 - J-Link Flash (Win)
 - ST-Link Flash (Linux)
 - ST-Link Flash (Win)
 
-Press ```Ctrl+Shift+J``` to bring up the task list.
+These tasks look for the STM32 tools in specific folders - check the paths in `.vscode/tasks.json` if you run into issues.
 
-These use the **stm32cubeclt** command line tools which need to be located in the folders specified in the ```tasks.json``` file.  You can of course change these.  
+You can also use STM32CubeIDE for flashing if you prefer.
 
-You can use an installation of **STM32CubeIDE** instead for this if you prefer, you'll need to change the paths to point at the tools located in your installation of the CubeIDE.
+### Debugging
 
-#### Debugging
-
-The ```launch.json``` file contains launch configurations for both J-Link and ST-Link probes:
-
+Launch configurations for debugging are in the `.vscode/launch.json` file:
 - JLink-Debug (Linux)
 - JLink-Debug (Win)
 - STLink-Debug (Linux)
 - STLink-Debug (Win)
 
-Again these contain paths that point specifically to an installation of the **stm32cubeclt** command line tools.  These need to be correct or debugging will not work.
+Getting debugging working in VS Code can sometimes be tricky, but these configurations work for me. If you have trouble, there's plenty of help online.
 
-Debugger setup in VS Code can be a brittle and frustrating process, the launch file provided works (for me) at the time of writing however your mileage may vary.  There is lots of guidance to be found (good and bad) on the internet if things don't work.
+### Building from the Command Line
 
-### Command Line Builds
-
-Navigate to the ```frugi``` folder and run the commands:
+If you prefer terminal commands:
 
 ```bash
 mkdir build
@@ -213,33 +190,29 @@ cmake --preset=debug
 cmake --build --preset=debug
 ```
 
-Note: Use ```--preset=release``` for an optimised Release build. Debug builds are limited to 3 voice polyphony.
+Use `--preset=release` for an optimized build. Note that debug builds are limited to 3-voice polyphony.
 
-I don't provide specific instructions on how to flash or debug from the command line since this will be specific to the SWD/JTAG probe you are using.  Please consult the documentation for the probe.  I use the command line build only for my CI build server which neither flashes or debugs the device.
+I don't include specific flashing instructions for command line builds, as they'll depend on what hardware programmer you're using.
 
+Who am I?
+I am what is impolitely, but totally correctly, referred to as a "graybeard".
 
-## Technical Requirements
-
-- STM32F411 Microcontroller
-- Sufficient RAM for voice buffers
-- Floating-point capability (hardware)
-- Audio DAC interface (I2S)
-
-
-## Who am I?
-I am what is impolitely, but totally correctly,  referred to as a "graybeard".
-
-I've been an embedded engineer on and off for over 40 years.  I've worked in the early machine vision and robotics industry.  I've also worked on control systems for various communication systems including paging (remember that), railway ticketing systems and satellites. I worked with Motorola,Zilog, Hitachi, ARM and a swathe of now long-forgotten microcontrollers in that time.
+I've been an embedded engineer on and off for over 40 years. I've worked in the early machine vision and robotics industry. I've also worked on control systems for various communication systems including paging (remember that), railway ticketing systems and satellites. I worked with Motorola,Zilog, Hitachi, ARM and a swathe of now long-forgotten microcontrollers in that time.
 
 These days I'm an architect and my main role is to draw pictures for others to do the coding, which is one of the reasons I do this, to keep my in and because like most programmers, I find hands-on coding both enjoyable and creative.
 
-I'm also a musician, once classically trained, who had planned a musical career but was convinced by the wages in 1983 to switch career.  I've played and performed in various bands as a keyboardist until the early 2000s.  So I've worked with many of the vintage synthesisers that are so sought after today (and sadly sold my fair share of them for peanuts over the years - I badly miss my Yamaha CS20M and Juno 106).
+I'm also a musician, once classically trained, who had planned a musical career but was convinced by the wages in 1983 to switch career. I've played and performed in various bands as a keyboardist until the early 2000s. So I've worked with many of the vintage synthesisers that are so sought after today (and sadly sold my fair share of them for peanuts over the years - I badly miss my Yamaha CS20M and Juno 106).
 
-Audio DSP is a hobby, it merges my two careers, something I find exciting and challenging.  As I head into retirement I need something to keep my brain active and this is ideal.  
+Audio DSP is a hobby, it merges my two careers, something I find exciting and challenging. As I head into retirement I need something to keep my brain active and this is ideal.
 
 So be warned, I may be further ahead on the learning pathway than some reading this but I don't claim to be a good, or even efficient, Audio DSP programmer.
 
 Melbourne 2025.
+
+## System Requirements
+
+- STM32F411 Microcontroller (Cortex M4F)
+- Audio DAC interface (I2S)
 
 ## License
 

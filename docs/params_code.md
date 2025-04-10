@@ -146,4 +146,4 @@ void dae_update_parameters()
 }
 ```
 
-That's really all there is to it! 
+That's really all there is to it! The parameter store is intentionally simple, making it easy to understand and use in your synthesizer projects.
