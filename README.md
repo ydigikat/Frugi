@@ -1,6 +1,6 @@
 # Frugi Synthesizer
 
-Frugi (meaning "frugal" or "stingey") is a beginner-friendly virtual analog synth for microcontrollers. Perfect for makers wanting to dip their toes into embedded audio!
+Frugi (meaning "frugal" or "stingy") is a beginner-friendly virtual analog synth for microcontrollers. Perfect for makers wanting to dip their toes into embedded audio!
 
 While Frugi is fully functional, it's designed more as a learning tool than a polished commercial product.
 
