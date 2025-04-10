@@ -12,8 +12,8 @@
 set(TARGET app.elf)
 
 # Board support
-set(BOARD stm32f411-blackpill)
-# set(BOARD stm32f411-disco)
+#set(BOARD stm32f411-blackpill)
+set(BOARD stm32f411-disco)
 
 
 # Folders
