@@ -1,5 +1,24 @@
-# STMF4 Synth Template
-This is my starting template for developing digital synthesisers on the STM32F4 family of microcontrollers.
+# Frugi
+Frugi, meaning frugal, is an 8-voice digital VA synthesiser for the STM32F411xe. 
+
+- **Voicing**
+  - Polyphonic (8 voices)
+  - Velocity sensitive
+  - Oldest note voice steal.
+
+- **Sound Generation**
+  - Dual oscillator with classic VA waveforms (saw, triangle, pulse).
+  - Pulse width variable on pulse wave.
+  - Antialised (polynomial BLEP)
+
+- **Sound Shaping**
+  - Multi-tap ladder style filter (LP4/2,BP4/2,HP4/2)
+  - Filter saturation.
+
+- **Modulation**
+  - LFO (inspired by the Yamaha CS20M) with 5 waveforms including sample & hold.
+  - Two envelope generators (one for volume, one for modulation)
+  - Flexible envelope modes (normal, biased, inverted, biased inverted)  
 
 Employs ```FreeRTOS``` for deterministic task scheduling with an interrupt driven audio engine.
 
@@ -8,7 +27,7 @@ Support is provided for:
 - STM32F411CE "Blackpill" generic board.
 - STM32F411-DISCO STM Discovery board.
 
-The board is chosen in the ```CMakeLists.txt``` file.
+The specfic board is selected in the ```CMakeLists.txt``` file.
 
 #### Board Support (BSP)
 The ```bsp``` folder contains the board support package for the supported development boards.  This includes managing the low-level DMA, I2S and other peripherals.
@@ -76,26 +95,6 @@ Synthesiser parameters are mapped to MIDI CC messages:
 ```
 
 #### Synthesiser
-This is a minimal synthesiser implementation, intended to provide a basic skeleton on which to build more sophisticated instruments.   
-
-- **Voicing**
-  - Polyphonic (8 voices)
-  - Velocity sensitive
-  - Oldest note voice steal.
-
-- **Sound Generation**
-  - Dual oscillator with classic VA waveforms (saw, triangle, pulse).
-  - Pulse width variable on pulse wave.
-  - Antialised (polynomial BLEP)
-
-- **Sound Shaping**
-  - Multi-tap ladder style filter (LP4/2,BP4/2,HP4/2)
-  - Filter saturation.
-
-- **Modulation**
-  - LFO (inspired by the Yamaha CS20M) with 5 waveforms including sample & hold.
-  - Two envelope generators (one for volume, one for modulation)
-  - Flexible envelope modes (normal, biased, inverted, biased inverted)  
 
 The oscillator uses Polynomial BLEP anti-aliasing for the Saw/Pulse waves, this is lightweight and works well with classic cyclic waves on a constained device.  
 
