@@ -1,5 +1,5 @@
 # Frugi
-Frugi, meaning frugal, is an 8-voice digital VA synthesiser for the STM32F411xe. 
+Frugi, meaning frugal, is a functional 8-voice digital VA synthesiser for the STM32F411xe. 
 
 - **Voicing**
   - Polyphonic (8 voices)
@@ -12,7 +12,7 @@ Frugi, meaning frugal, is an 8-voice digital VA synthesiser for the STM32F411xe.
   - Antialised (polynomial BLEP)
 
 - **Sound Shaping**
-  - Multi-tap ladder style filter (LP4/2,BP4/2,HP4/2)
+  - Multi-tap resonant ladder style filter (LP4/2,BP4/2,HP4/2)
   - Filter saturation.
 
 - **Modulation**
