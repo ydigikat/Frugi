@@ -1,0 +1,120 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "JLink-Flash (Linux)",
+			"command": "/opt/st/stm32cubeclt/STM32CubeProgrammer/bin/STM32_Programmer_CLI",
+			"args": [
+				"-c",
+				"port=JLink",
+				"reset=SWrst",
+				"-w",
+				"${workspaceFolder}/build/${command:cmake.activeBuildPresetName}/build/source/app.elf",
+				"-g"
+			],
+			"dependsOn": "CMake: build",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label": "JLink-Flash (Win)",
+			"command": "C:/ST/stm32cubeclt_1.17.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe",
+			"args": [
+				"-c",
+				"port=JLink",
+				"reset=SWrst",
+				"-w",
+				"${workspaceFolder}/build/${command:cmake.activeBuildPresetName}/build/source/app.elf",
+				"-g"
+			],
+			"dependsOn": "CMake: build",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label": "STLink-Flash (Linux)",
+			"command": "/opt/st/stm32cubeclt/STM32CubeProgrammer/bin/STM32_Programmer_CLI",
+			"args": [
+				"-c",
+				"port=SWD",
+				"mode=UR",
+				"reset=SWrst",
+				"-w",
+				"${workspaceFolder}/build/${command:cmake.activeBuildPresetName}/build/source/app.elf",
+				"-g"
+			],
+			"dependsOn": "CMake: build",
+			"problemMatcher": ["$gcc"],
+			"group": "build"
+		},
+		
+		{
+			"type": "shell",
+			"label": "STLink-Flash (Win)",
+			"command": "C:/ST/stm32cubeclt_1.17.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe",
+			"args": [
+				"-c",
+				"port=SWD",
+				"mode=UR",
+				"reset=SWrst",
+				"-w",
+				"${workspaceFolder}/build/${command:cmake.activeBuildPresetName}/build/source/app.elf",
+				"-g"
+			],
+			"dependsOn": "CMake: build",
+			"problemMatcher": ["$gcc"],
+			"group": "build"
+		},
+	
+		{
+			"type": "cmake",
+			"label": "CMake: clean rebuild",
+			"command": "cleanRebuild",
+			"targets": [
+				"all"
+			],
+			"preset": "${command:cmake.activeBuildPresetName}",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"detail": "CMake template clean rebuild task"
+		},
+		{
+			"type": "cmake",
+			"label": "CMake: configure",
+			"command": "configure",
+			"preset": "${command:cmake.activeConfigurePresetName}",
+			"problemMatcher": ["$gcc"],
+			"detail": "CMake template configure task"
+		},
+		{
+			"type": "cmake",
+			"label": "CMake: build",
+			"command": "build",
+			"targets": [
+				"all"
+			],
+			"preset": "${command:cmake.activeBuildPresetName}",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"detail": "CMake template build task"
+		},
+		{
+			"type": "cmake",
+			"label": "CMake: build",
+			"command": "build",
+			"targets": [
+				"all"
+			],
+			"preset": "${command:cmake.activeBuildPresetName}",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": ["$gcc"],
+			"detail": "CMake template build task"
+		}
+	]
+}
