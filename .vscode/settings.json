@@ -1,7 +1,7 @@
 {
   "cortex-debug.variableUseNaturalFormat": true,
   "files.associations": {
-   
+    "param_store.h": "c"
   },
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"  
 }

@@ -17,7 +17,7 @@
 
 #include "dae.h"
 #include "ui.h"
-
+#include "trace.h"
 #include "synth.h"
 
 extern bool dae_start(UBaseType_t priority);

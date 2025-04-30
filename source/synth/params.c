@@ -72,7 +72,7 @@ static void populate_cc_array(uint8_t map_array[])
   }
 
   /* Now populate with the mappings */
-  for (int i = 0; i < SYNTH_PARAM_MAX-1; i++)
+  for (int i = 0; i <= SYNTH_PARAM_MAX-1; i++)
   {
     map_array[mappings[i].cc] = mappings[i].param;
   }
@@ -202,7 +202,7 @@ shared by all patches*/
 void load_factory_patch(uint8_t patch_number, uint8_t *cc_param_map)
 {
   /* Start with the base patch, this contains default values for all parameters */
-  for (uint16_t i = 0; i < SYNTH_PARAM_MAX-1; i++)
+  for (uint16_t i = 0; i <= SYNTH_PARAM_MAX-1; i++)
   {
     param_set_midi(i, base_patch[i].value);
   }
